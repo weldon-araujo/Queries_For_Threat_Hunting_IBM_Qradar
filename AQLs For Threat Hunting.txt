@@ -1,0 +1,353 @@
+
+IOCs aleatórios:
+
+	Busca por lista de IOCs aleatórios 
+
+	SELECT LOGSOURCETYPENAME(devicetype)
+		AS 'Device names' FROM events
+		WHERE domainid = 10
+		and "Device names" = 'Microsoft Windows Security Event Log'
+		and (UTF8("payload")	ilike '%C:\\Windows\system32\svchost.exe -K netsvcs -p -s Schedule%'
+		or UTF8("payload")	ilike '%C:\Windows\system32\wscript.EXE%'
+		or UTF8("payload")	ilike '%C:\Windows\System32\WindowsPowerShell\vl.O\powershell.exe C:\Users\AREDACTED\AppData\Local\Microsoft\Windows\Update\temp.psl')
+		START '2023-05-01 00:00:00'	STOP '2023-05-02 00:00:00'
+
+
+
+URLS E URIs:
+
+	Busca de URLS e URIs por tipo de fonte de log: 
+
+	SELECT (LOGSOURCENAME(logsourceid)), sourceip, sourceport, destinationip, destinationport, "Destination Hostname", "HTTP Host", "URL Path","url", "Resource Path" FROM events 
+		WHERE domainid = 1 
+		GROUP BY "URL Path"
+		START '2023-08-02 00:00:00' STOP '2023-08-03 00:00:00'
+
+
+	Busca de URLS e URIs filtrada por método HTTP e tipo de fonte de log: 
+
+		SELECT (LOGSOURCENAME(logsourceid)),"HTTP Method", "HTTP Host", "URL Path" FROM events 
+			WHERE domainid = 1
+			and "HTTP Method" = 'WEBDAV'
+			GROUP BY "URL Path"
+			START '2023-08-01 00:00:00' STOP '2023-08-02 00:00:00'
+	
+
+	Busca por URL expecifica:
+	
+		SELECT (LOGSOURCENAME(logsourceid)), "HTTP Method", sourceip, sourceport, destinationip, destinationport, "HTTP Host", "URL Path" FROM events 
+			WHERE domainid = 1 
+			and "URL Path" = '/NETLOGON/admin_local.bat'
+			GROUP BY "HTTP Method"
+			last 2 HOURS	
+
+
+	Busca por URLs, URIs e fontes de lgo agrupadas por método HTTP
+
+		SELECT (LOGSOURCENAME(logsourceid)),"HTTP Method", "HTTP Host", "URL Path" FROM events 
+			WHERE domainid = 1
+			GROUP BY "HTTP Method"
+			START '2023-08-01 00:00:00' STOP '2023-08-02 00:00:00'
+			
+
+	Buscar por várias URLs específicas e vários IPs destino ou origem e fontes de log:
+
+		SELECT (LOGSOURCENAME(logsourceid)), sourceip, sourceport, destinationip, destinationport, URL,"request uri",  "URL Referrer", "URL Path", "URL Host" 
+		FROM events 
+			WHERE domainid = 1 
+			and sourceip in ('172.26.18.117','172.26.20.27','172.26.23.52','172.26.20.32','172.26.20.15','172.26.18.145') 
+			AND (URL LIKE '%printenv.shtml%' OR URL LIKE '%ssi/printenv.shtml%')
+			START '2023-05-01 00:00:00' STOP '2023-05-19 00:00:00'
+		
+	Buscar por padrão dentro de URL com vários IPs de destino e qualquer fonte de log:
+
+		SELECT (LOGSOURCENAME(logsourceid)), sourceip, sourceport, destinationip, destinationport, URL, "request uri", "URL Referrer", "URL Path", "URL Host" FROM events
+			WHERE domainid = 1 
+			and destinationip in ('172.26.18.79','172.26.23.44','172.26.23.72','172.26.39.168') 
+			AND (URL LIKE '%cgi%' OR "URL Path" LIKE '%cgi%')
+			START '2023-06-01 00:00:00' STOP '2023-06-02 00:00:00'
+
+
+	Busca por lista de URLs mas tirando algum valor específico da busca: 
+
+		SELECT sourceip, sourceport, destinationip, destinationport, URL, "URL Referrer", "URL Path", "URL Host" 
+		FROM events WHERE (((domainid = 1 
+		and sourceip in ('172.26.18.117','172.26.20.27','172.26.23.52','172.26.20.32','172.26.20.15','172.26.18.145')) 
+		AND URL <> 'www.msftconnecttest.com') 
+		AND URL IS NOT NULL) 
+		START '2023-05-01 00:00:00' STOP '2023-05-21 00:00:00'
+
+
+	Busca por lista de URLs:
+
+		SELECT LOGSOURCENAME(logsourceid), "URL", "URL Referrer", "URL Path", "URL Host" from events 
+			WHERE "domainid" = 10 
+			and "URL" IN ('http://js.f4321y.com:280/v.sct:MyKings',
+			'http://load2.wpd0126.info/pld:MyKings')
+			GROUP BY URL
+			START '2023-05-01 00:00:00' STOP '2023-05-18 00:00:00'
+		
+
+QUALQER VALOR DENTRO DO LOG:
+
+	Buscas algum valor dentro log raw:
+
+		SELECT LOGSOURCENAME(logsourceid) from events
+			WHERE UTF8("payload") 
+			ilike '%qualquer coisa%' 
+			and "domainid" = 10 
+			START '2023-05-11 00:00:00'	STOP '2023-05-11 00:00:00'
+
+	
+	Buscas por algum valor dentro de log usando REGEX:
+
+		SELECT sourceip, sourceport, destinationip, destinationport FROM events
+			WHERE domainid = 19
+			and UTF8(payload) IMATCHES '.*\b\d+\.zip\b.*'
+			start '2023-05-01 00:00:00' stop '2023-05-08 00:00:00'
+		
+		Obs: "Imatch não é case sensitive"
+
+
+
+ENDEREÇOS IP:
+
+	Busca por linha de comando, ip de origem e usuário:
+
+		SELECT Command, sourceip, username from events 
+			WHERE "domainid" = 3 
+			AND Command IS NOT NULL
+			START '2023-05-01 00:00:00' STOP '2023-05-11 00:00:00'
+
+
+	Busca por comunicação de IP de origem e destino específicos:
+
+		SELECT * from events 
+			WHERE sourceip = '172.16.20.10' and destinationip = '163.123.142.213' 
+			and domainid = 19 
+			START '2023-05-13 00:00:00' STOP '2023-05-17 00:00:00'
+	
+	
+	Busca por IP de destino ou origem em porta de destino específica:
+	
+		SELECT * from events 
+			WHERE sourceip = '163.123.142.213' or destinationip = '163.123.142.213' 
+			and destinationport = '80' and domainid = 19 
+			START '2023-05-13 00:00:00' STOP '2023-05-17 00:00:00'
+
+	Busca por porta de origem ou destino esepcíficas:
+
+		SELECT sourceip, sourceport,destinationip, destinationport from events WHERE domainid = 1 
+			and sourceport = '12345' 
+			or destinationport = '12345' 
+			start '2023-05-10 00:00:00' stop '2023-05-15 00:00:00'
+	
+	
+	Buscar por comunicação com IP de Origem ou Destino:
+	
+		SELECT * from events
+			where sourceip = '8.8.8.8' 	or destinationip = '8.8.8.8' 
+			and domainid = 10 
+			start '2023-04-15 00:00:00' stop '2023-05-11 00:00:00'
+	
+	
+	Busca por comunicação contendo lista de IPs na origem ou destino: 
+	
+		SELECT LOGSOURCENAME(logsourceid), sourceip, sourceport, destinationip, destinationport
+			FROM events
+			WHERE domainid = 10
+			AND (sourceip IN ('022.07.08.00', '022.10.20.02')
+			OR destinationip IN ('022.07.08.00', '022.10.20.02'))
+			start '2023-04-15 00:00:00' stop '2023-05-11 00:00:00'
+
+
+	Busca por comunicação contendo lista de IPs de destino em porta de destino específica:
+
+		SELECT LOGSOURCENAME(logsourceid), sourceip, sourceport, destinationip, destinationport
+			FROM events
+			WHERE domainid = 1
+			AND (destinationip IN ('172.26.18.198','172.26.24.141','172.26.35.53','172.26.40.66'))
+			AND destinationport = 3389
+			GROUP BY destinationip
+			start '2023-07-01 00:00:00' stop '2023-07-014 00:00:00'
+
+
+	Busca por comunicação contendo lista de IPs de origem específica e lista de Ips de destino específica:
+
+		SELECT LOGSOURCENAME(logsourceid), sourceip, sourceport, destinationip, destinationport
+			FROM events
+			WHERE domainid = 1
+			AND (destinationip IN ('104.161.32.25', '104.161.32.85'))
+			AND (sourceip IN ('172.26.40.66','172.26.18.198'))
+			GROUP BY destinationip
+			start '2023-07-01 00:00:00' stop '2023-07-14 00:00:00'
+
+
+	Busca por comunicação contendo lista de IPs de origem em porta de destino específica:
+
+
+
+LINHA DE COMANDO:
+
+	Busca por linha de comando específica:
+
+		SELECT (LOGSOURCENAME(logsourceid)), Command, sourceip, username from events 
+			WHERE "domainid" = 1 
+			and Command = 'ssh-keygen -t rsa -f $HOME/.ssh/id_rsa -P' 
+			START '2023-06-01 00:00:00' STOP '2023-06-02 00:00:00'
+
+
+	Buscas por várias linhas de comandos específicas:
+
+		SELECT "Threat Name", "Object Name", Command, sourceip, username from events 
+			WHERE "domainid" = 10
+			and Command IN 
+			('get-childitem "c:\Program Files" | out-string',
+			'get-childitem "C:\Program Files (x86)" | out-string',
+			'Get-ChildItem $env:LOCALAPPDATA | out-string') 
+			START '2023-06-01 00:00:00' STOP '2023-06-12 00:00:00'
+
+
+
+AMEAÇAS:
+
+	Buscar por todas ameaças:
+
+		SELECT 'Threat Name' from events 
+		WHERE "domainid" = 3 
+		START '2023-05-01 00:00:00' STOP '2023-05-11 00:00:59'
+
+
+	Buscar por ameaças específicas:
+
+		SELECT * from events 
+		WHERE "domainid" = 3 and "threat name" = 'a ameça que você está procurando'
+		START '2023-05-01 00:00:00' STOP '2023-05-11 00:00:00'
+
+		
+	Buscas por ameaças em variadas fontes de log:
+
+		SELECT "Threat Name", "Object Name", Command, sourceip, username from events 
+			WHERE "domainid" = 19
+			and Command IN 
+			('C:\Windows\System32\Tasks\At1',
+			'C:\WINDOWS\SysWOW64\At.exe') 
+			or "Threat Name" in 
+			('C:\Windows\System32\Tasks\At1',
+			'C:\WINDOWS\SysWOW64\At.exe')
+			or "Object Name" in
+			('C:\Windows\System32\Tasks\At1',
+			'C:\WINDOWS\SysWOW64\At.exe')
+			START '2023-06-01 00:00:00' STOP '2023-06-02 00:00:00'
+
+
+
+FONTES DE LOG:
+
+	Buscar por identificação de fontes de logs de vários domínios:
+
+		SELECT domainid, (LOGSOURCENAME(logsourceid)) as 'logsource' FROM events
+			WHERE domainid = 1 
+			GROUP BY logsource
+			START '2023-06-01 00:00:00' STOP '2023-06-02 00:00:00'
+
+
+	Buscar eventos por tipo de fontes de log:
+
+		SELECT LOGSOURCETYPENAME(devicetype)
+			AS 'Device names' FROM events
+			WHERE "Device names" = 'Microsoft Windows Security Event Log'
+			GROUP BY "Device names" 
+			START '2023-05-01 00:00:00' STOP '2023-05-22 00:00:00'
+
+
+	Buscar por valor dentro de log por fonte de log específica:
+
+		SELECT LOGSOURCETYPENAME(devicetype)
+			AS 'Device names', sourceip, sourceport, destinationip, destinationport, username FROM events
+			WHERE (domainid = 1 
+			and "Device names" = 'Microsoft Windows Security Event Log'
+			and UTF8("payload")	ilike '%atmfd.dll%') AND sourceip <> '198.18.255.129'
+			START '2023-06-01 00:00:00'	STOP '2023-06-15 00:00:00'
+
+
+
+HASHS:
+
+	Buscar lista com hashes MD5:
+
+		SELECT (LOGSOURCENAME(logsourceid)), sourceip, destinationip from events
+			WHERE "domainid" = 10 and "MD5 Hash" IN (
+			'383d20de8f94d12a6ded1e03f53c1e16','be12cf29d01de28944af89de391f2d9a')
+			START '2023-05-01 00:00:00' STOP '2023-05-11 00:00:00'
+
+	
+	Busca por hashes específico MD5 ou SHA1:
+
+		SELECT (LOGSOURCENAME(logsourceid)), sourceip, destinationip from events 
+			WHERE "domainid" = 1 
+			and "MD5 Hash" = '4a8a82fc128d9a0ed4cffdaca92b52b2'
+			or "SHA1 Hash" = 'a893b42f5ce2641867722dc374b8891b3e86efcb'
+			START '2023-05-01 00:00:00' STOP '2023-05-11 00:00:00'
+	
+	
+	Buscar lista com hashes SHA256
+		
+		SELECT (LOGSOURCENAME(logsourceid)), sourceip, destinationip, "SHA256 Hash" from events
+			WHERE "domainid" = 1 and "SHA256 Hash" IN (
+			'a7a665a695ec3c0f862a0d762ad55aff6ce6014359647e7c7f7e3c4dc3be81b7',
+			'b8d2ea419e9a12adc91920637e7750e492aa144252009855c28bcc490dd094a0')
+			START '2023-05-21 00:00:00' STOP '2023-05-31 00:00:00'
+	
+
+	Buscar lista com hashes SHA1
+		
+		SELECT (LOGSOURCENAME(logsourceid)), sourceip, destinationip, "SHA1 Hash" from events
+			WHERE "domainid" = 1 and "SHA1 Hash" IN (
+			'f513b21738ae3083d79e4fa1039889e1c3efff58',
+			'')
+			START '2023-05-21 00:00:00' STOP '2023-05-31 00:00:00'
+
+
+
+WINDOWS:
+	
+	Busca por eventos Sysmon com event ID 1 (Criação de processos)
+	
+		SELECT (LOGSOURCENAME(logsourceid)), "Command", "Object Name Lowercase", "Parent Command", "Parent Process Name", "Parent Process Path", "Process Name", "Process Path" from events
+			WHERE domainid = 1 
+			and "Event ID" = 1
+			START '2023-05-21 00:00:00' STOP '2023-05-31 00:00:00'
+			
+		
+
+RULES:
+
+	Buscas por eventos anexados pela regra:
+
+		SELECT * from events
+			where RULENAME(creEventList) ILIKE '%Excessive Firewall Denies from Single Source%'
+			START '2023-05-21 00:00:00' STOP '2023-05-31 00:00:00'
+					
+
+
+TÉCNICAS DE HACKING:
+
+	Busca por comportamentos que se assemelhem a comportamento de fuzzing
+
+		SELECT (LOGSOURCENAME(logsourceid)), DATEFORMAT(starttime,'yyyy-MM-dd h:m:s a'), sourceip, sourceport, destinationip, destinationport, URL,"request uri", "URL Referrer", "URL Path", "URL Host" 
+		FROM events 
+		WHERE (domainid = 1 and destinationip = '172.26.18.55') AND URL IS NOT NULL
+		START '2023-05-01 00:00:00' STOP '2023-05-22 00:00:00'
+
+
+	Pós Exploration:
+
+		Identificação de versão de kernel linux:
+
+
+
+TOOLS PARA HACKING:
+
+
+	
