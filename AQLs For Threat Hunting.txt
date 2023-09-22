@@ -3,14 +3,13 @@ IOCs aleatórios:
 
 	Busca por lista de IOCs aleatórios 
 
-	SELECT LOGSOURCETYPENAME(devicetype)
-		AS 'Device names' FROM events
-		WHERE domainid = 10
-		and "Device names" = 'Microsoft Windows Security Event Log'
-		and (UTF8("payload")	ilike '%C:\\Windows\system32\svchost.exe -K netsvcs -p -s Schedule%'
-		or UTF8("payload")	ilike '%C:\Windows\system32\wscript.EXE%'
-		or UTF8("payload")	ilike '%C:\Windows\System32\WindowsPowerShell\vl.O\powershell.exe C:\Users\AREDACTED\AppData\Local\Microsoft\Windows\Update\temp.psl')
-		START '2023-05-01 00:00:00'	STOP '2023-05-02 00:00:00'
+		SELECT LOGSOURCETYPENAME(devicetype) AS 'Device names' FROM events
+			WHERE domainid = 10
+			and "Device names" = 'Microsoft Windows Security Event Log'
+			and (UTF8("payload")	ilike '%C:\\Windows\system32\svchost.exe -K netsvcs -p -s Schedule%'
+			or UTF8("payload")	ilike '%C:\Windows\system32\wscript.EXE%'
+			or UTF8("payload")	ilike '%C:\Windows\System32\WindowsPowerShell\vl.O\powershell.exe C:\Users\AREDACTED\AppData\Local\Microsoft\Windows\Update\temp.psl')
+			START '2023-05-01 00:00:00'	STOP '2023-05-02 00:00:00'
 
 
 
@@ -42,7 +41,7 @@ URLS E URIs:
 			last 2 HOURS	
 
 
-	Busca por URLs, URIs e fontes de lgo agrupadas por método HTTP
+	Busca por URLs, URIs e fontes de log agrupadas por método HTTP
 
 		SELECT (LOGSOURCENAME(logsourceid)),"HTTP Method", "HTTP Host", "URL Path" FROM events 
 			WHERE domainid = 1
@@ -59,6 +58,12 @@ URLS E URIs:
 			AND (URL LIKE '%printenv.shtml%' OR URL LIKE '%ssi/printenv.shtml%')
 			START '2023-05-01 00:00:00' STOP '2023-05-19 00:00:00'
 		
+		Obs: A query trabalha com o conceito "contém" e não com valor esxato sendo assim poderia trazer os seguintes resultados:
+			/printenv.shtml
+			/qualquercoisa/printenv.shtml
+			/qualquercoisa/printenv.shtml/outracoisa
+
+			
 	Buscar por padrão dentro de URL com vários IPs de destino e qualquer fonte de log:
 
 		SELECT (LOGSOURCENAME(logsourceid)), sourceip, sourceport, destinationip, destinationport, URL, "request uri", "URL Referrer", "URL Path", "URL Host" FROM events
@@ -107,7 +112,6 @@ QUALQER VALOR DENTRO DO LOG:
 			start '2023-05-01 00:00:00' stop '2023-05-08 00:00:00'
 		
 		Obs: "Imatch não é case sensitive"
-
 
 
 ENDEREÇOS IP:
@@ -224,7 +228,7 @@ AMEAÇAS:
 		WHERE "domainid" = 3 and "threat name" = 'a ameça que você está procurando'
 		START '2023-05-01 00:00:00' STOP '2023-05-11 00:00:00'
 
-		
+
 	Buscas por ameaças em variadas fontes de log:
 
 		SELECT "Threat Name", "Object Name", Command, sourceip, username from events 
@@ -255,21 +259,21 @@ FONTES DE LOG:
 	Buscar eventos por tipo de fontes de log:
 
 		SELECT LOGSOURCETYPENAME(devicetype)
-			AS 'Device names' FROM events
-			WHERE "Device names" = 'Microsoft Windows Security Event Log'
-			GROUP BY "Device names" 
+			AS 'Device name' FROM events
+			WHERE "Device name" = 'Microsoft Windows Security Event Log'
+			GROUP BY "Device name" 
 			START '2023-05-01 00:00:00' STOP '2023-05-22 00:00:00'
 
 
-	Buscar por valor dentro de log por fonte de log específica:
+	Buscar por valor dentro de log por tipo de fonte de log específica excluindo um endereço de origem específico:
 
-		SELECT LOGSOURCETYPENAME(devicetype)
-			AS 'Device names', sourceip, sourceport, destinationip, destinationport, username FROM events
+		SELECT LOGSOURCETYPENAME(devicetype) AS 'Device name', sourceip, sourceport, destinationip, destinationport, username FROM events
 			WHERE (domainid = 1 
-			and "Device names" = 'Microsoft Windows Security Event Log'
-			and UTF8("payload")	ilike '%atmfd.dll%') AND sourceip <> '198.18.255.129'
+			and "Device name" = 'Microsoft Windows Security Event Log'
+			and UTF8("payload")	ilike '%atmfd.dll%') 
+			AND sourceip <> '198.18.255.129'
 			START '2023-06-01 00:00:00'	STOP '2023-06-15 00:00:00'
-
+			
 
 
 HASHS:
@@ -335,10 +339,9 @@ TÉCNICAS DE HACKING:
 
 	Busca por comportamentos que se assemelhem a comportamento de fuzzing
 
-		SELECT (LOGSOURCENAME(logsourceid)), DATEFORMAT(starttime,'yyyy-MM-dd h:m:s a'), sourceip, sourceport, destinationip, destinationport, URL,"request uri", "URL Referrer", "URL Path", "URL Host" 
-		FROM events 
-		WHERE (domainid = 1 and destinationip = '172.26.18.55') AND URL IS NOT NULL
-		START '2023-05-01 00:00:00' STOP '2023-05-22 00:00:00'
+		SELECT (LOGSOURCENAME(logsourceid)), DATEFORMAT(starttime,'yyyy-MM-dd h:m:s a'), sourceip, sourceport, destinationip, destinationport, URL, "request uri", "URL Referrer", "URL Path", "URL Host" FROM events 
+			WHERE (domainid = 1 and destinationip = '172.26.18.55') AND URL IS NOT NULL
+			START '2023-05-01 00:00:00' STOP '2023-05-22 00:00:00'
 
 
 	Pós Exploration:
