@@ -258,8 +258,7 @@ FONTES DE LOG:
 
 	Buscar eventos por tipo de fontes de log:
 
-		SELECT LOGSOURCETYPENAME(devicetype)
-			AS 'Device name' FROM events
+		SELECT LOGSOURCETYPENAME(devicetype) AS 'Device name' FROM events
 			WHERE "Device name" = 'Microsoft Windows Security Event Log'
 			GROUP BY "Device name" 
 			START '2023-05-01 00:00:00' STOP '2023-05-22 00:00:00'
