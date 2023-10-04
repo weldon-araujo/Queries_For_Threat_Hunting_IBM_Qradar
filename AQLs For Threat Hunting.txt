@@ -279,9 +279,9 @@ HASHS:
 
 	Buscar lista com hashes MD5:
 
-		SELECT (LOGSOURCENAME(logsourceid)), sourceip, destinationip from events
-			WHERE "domainid" = 10 and "MD5 Hash" IN (
-			'383d20de8f94d12a6ded1e03f53c1e16','be12cf29d01de28944af89de391f2d9a')
+		SELECT LOGSOURCENAME(logsourceid), sourceip, destinationip from events
+			WHERE "domainid" = 10 
+			and "MD5 Hash" IN ('383d20de8f94d12a6ded1e03f53c1e16','be12cf29d01de28944af89de391f2d9a')
 			START '2023-05-01 00:00:00' STOP '2023-05-11 00:00:00'
 
 	
