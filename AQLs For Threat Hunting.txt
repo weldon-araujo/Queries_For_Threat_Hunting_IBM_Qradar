@@ -98,9 +98,8 @@ QUALQER VALOR DENTRO DO LOG:
 	Buscas algum valor dentro log raw:
 
 		SELECT LOGSOURCENAME(logsourceid) from events
-			WHERE UTF8("payload") 
-			ilike '%qualquer coisa%' 
-			and "domainid" = 10 
+			WHERE "domainid" = 10 
+			and UTF8("payload")	ilike '%qualquer coisa%' 
 			START '2023-05-11 00:00:00'	STOP '2023-05-11 00:00:00'
 
 	
