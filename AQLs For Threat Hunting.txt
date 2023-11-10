@@ -3,12 +3,12 @@ IOCs aleatórios:
 
 	Busca por lista de IOCs aleatórios 
 
-		SELECT LOGSOURCETYPENAME(devicetype) AS 'Device names' FROM events
+		SELECT LOGSOURCETYPENAME(devicetype) AS 'Device name' FROM events
 			WHERE domainid = 10
-			and "Device names" = 'Microsoft Windows Security Event Log'
-			and (UTF8("payload")	ilike '%C:\\Windows\system32\svchost.exe -K netsvcs -p -s Schedule%'
-			or UTF8("payload")	ilike '%C:\Windows\system32\wscript.EXE%'
-			or UTF8("payload")	ilike '%C:\Windows\System32\WindowsPowerShell\vl.O\powershell.exe C:\Users\AREDACTED\AppData\Local\Microsoft\Windows\Update\temp.psl')
+			and "Device name" = 'Microsoft Windows Security Event Log'
+			and (UTF8("payload") ilike '%C:\\Windows\system32\svchost.exe -K netsvcs -p -s Schedule%'
+			or UTF8("payload") ilike '%C:\Windows\system32\wscript.EXE%'
+			or UTF8("payload") ilike '%C:\Windows\System32\WindowsPowerShell\vl.O\powershell.exe C:\Users\AREDACTED\AppData\Local\Microsoft\Windows\Update\temp.psl')
 			START '2023-05-01 00:00:00'	STOP '2023-05-02 00:00:00'
 
 
