@@ -8,7 +8,7 @@ IOCs aleatórios:
 			and "Device name" = 'Microsoft Windows Security Event Log'
 			and (UTF8("payload") ilike '%C:\\Windows\system32\svchost.exe -K netsvcs -p -s Schedule%'
 			or UTF8("payload") ilike '%C:\Windows\system32\wscript.EXE%'
-			or UTF8("payload") ilike '%C:\Windows\System32\WindowsPowerShell\vl.O\powershell.exe C:\Users\AREDACTED\AppData\Local\Microsoft\Windows\Update\temp.psl')
+			or UTF8("payload") ilike '%C:\Windows\System32\WindowsPowerShell\vl.O\powershell.exe C:\Users\AREDACTED\AppData\Local\Microsoft\Windows\Update\temp.psl%')
 			START '2023-05-01 00:00:00'	STOP '2023-05-02 00:00:00'
 
 
@@ -126,10 +126,10 @@ ENDEREÇOS IP:
 	Busca por comunicação de IP de origem e destino específicos:
 
 		SELECT * from events 
-			WHERE sourceip = '172.16.20.10' and destinationip = '163.123.142.213' 
-			and domainid = 19 
+			WHERE domainid = 19
+			and sourceip = '172.16.20.10' and destinationip = '163.123.142.213' 
 			START '2023-05-13 00:00:00' STOP '2023-05-17 00:00:00'
-	
+		
 	
 	Busca por IP de destino ou origem em porta de destino específica:
 	
