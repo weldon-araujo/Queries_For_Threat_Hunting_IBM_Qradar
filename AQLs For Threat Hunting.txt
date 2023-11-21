@@ -54,8 +54,8 @@ URLS E URIs:
 		SELECT (LOGSOURCENAME(logsourceid)), sourceip, sourceport, destinationip, destinationport, URL,"request uri",  "URL Referrer", "URL Path", "URL Host" 
 		FROM events 
 			WHERE domainid = 1 
-			and sourceip in ('172.26.18.117','172.26.20.27','172.26.23.52','172.26.20.32','172.26.20.15','172.26.18.145') 
-			AND (URL LIKE '%printenv.shtml%' OR URL LIKE '%ssi/printenv.shtml%')
+			and (sourceip in ('172.26.18.117','172.26.20.27','172.26.23.52','172.26.20.32','172.26.20.15','172.26.18.145') 
+			AND (URL LIKE '%printenv.shtml%' OR URL LIKE '%ssi/printenv.shtml%'))
 			START '2023-05-01 00:00:00' STOP '2023-05-19 00:00:00'
 		
 		Obs: A query trabalha com o conceito "contém" e não com valor esxato sendo assim poderia trazer os seguintes resultados:
