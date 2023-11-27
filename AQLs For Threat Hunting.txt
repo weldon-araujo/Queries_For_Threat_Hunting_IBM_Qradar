@@ -17,7 +17,7 @@ URLS E URIs:
 
 	Busca de URLS e URIs por tipo de fonte de log: 
 
-	SELECT (LOGSOURCENAME(logsourceid)), sourceip, sourceport, destinationip, destinationport, "Destination Hostname", "HTTP Host", "URL Path","url", "Resource Path" FROM events 
+	SELECT (LOGSOURCENAME(logsourceid)) as 'source', sourceip, sourceport, destinationip, destinationport, "Destination Hostname", "HTTP Host", "URL Path","url", "Resource Path" FROM events 
 		WHERE domainid = 1 
 		GROUP BY "URL Path"
 		START '2023-08-02 00:00:00' STOP '2023-08-03 00:00:00'
@@ -51,11 +51,11 @@ URLS E URIs:
 
 	Buscar por várias URLs específicas e vários IPs destino ou origem e fontes de log:
 
-		SELECT (LOGSOURCENAME(logsourceid)), sourceip, sourceport, destinationip, destinationport, URL,"request uri",  "URL Referrer", "URL Path", "URL Host" 
-		FROM events 
+		SELECT (LOGSOURCENAME(logsourceid)), sourceip, sourceport, destinationip, destinationport, URL,"request uri",  "URL Referrer", "URL Path", "URL Host" FROM events 
 			WHERE domainid = 1 
 			and (sourceip in ('172.26.18.117','172.26.20.27','172.26.23.52','172.26.20.32','172.26.20.15','172.26.18.145') 
-			AND (URL LIKE '%printenv.shtml%' OR URL LIKE '%ssi/printenv.shtml%'))
+			AND (URL LIKE '%printenv.shtml%' 
+			OR URL LIKE '%ssi/printenv.shtml%'))
 			START '2023-05-01 00:00:00' STOP '2023-05-19 00:00:00'
 		
 		Obs: A query trabalha com o conceito "contém" e não com valor esxato sendo assim poderia trazer os seguintes resultados:
