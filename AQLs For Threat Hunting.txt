@@ -296,7 +296,8 @@ HASHS:
 	Buscar lista com hashes SHA256
 		
 		SELECT (LOGSOURCENAME(logsourceid)), sourceip, destinationip, "SHA256 Hash" from events
-			WHERE "domainid" = 1 and "SHA256 Hash" IN (
+			WHERE "domainid" = 1 
+			and "SHA256 Hash" IN (
 			'a7a665a695ec3c0f862a0d762ad55aff6ce6014359647e7c7f7e3c4dc3be81b7',
 			'b8d2ea419e9a12adc91920637e7750e492aa144252009855c28bcc490dd094a0')
 			START '2023-05-21 00:00:00' STOP '2023-05-31 00:00:00'
